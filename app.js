@@ -13,6 +13,8 @@ loadEventListeners();
 // Load all event listeners 
 
 function loadEventListeners() {
+  //Dom Load Event
+  document.addEventListener('DOMContentLoaded', getTasks);
   // Add task event 
   form.addEventListener('submit', addTask);
   // Remove task event
@@ -24,6 +26,40 @@ function loadEventListeners() {
   filter.addEventListener('keyup', filterTasks);
 
 };
+// Get tasks from LS
+function getTasks(){
+  let tasks;
+if(localStorage.getItem('tasks') === null){
+  tasks = [];
+} else {
+  tasks = JSON.parse(localStorage.getItem('tasks'));
+  
+}
+tasks.forEach(function(task){
+  //create li element 
+  const li = document.createElement('li');
+  //add a class to it
+  li.className = 'collection-item';
+  // Create text node and append to li 
+  li.appendChild(document.createTextNode(task));
+
+  // Create a new link element
+  const link = document.createElement('a');
+  //add class
+  link.className = 'delete-item secondary-content';
+  // Add icon html 
+  link.innerHTML = '<i class="fa fa-remove"></i>';
+  //Append the link to li 
+  li.appendChild(link);
+
+  // Append li to ul
+  taskList.appendChild(li);
+
+});
+
+// localStorage.setItem('task', JSON.stringify('tasks'));
+};
+
 
 //Add Task 
 function addTask(e) {
@@ -48,14 +84,29 @@ function addTask(e) {
   li.appendChild(link);
 
   // Append li to ul
-
   taskList.appendChild(li);
+
+  // Store in Local Storage
+  storeTaskInLocalStorage(taskInput.value);  
 
   // Clear input 
   taskInput.value = '';
 
   e.preventDefault();
 }
+// Store Task in local storage
+function storeTaskInLocalStorage(task){
+let tasks;
+if(localStorage.getItem('tasks') === null){
+  tasks = [];
+} else {
+  tasks = JSON.parse(localStorage.getItem('task'));
+  
+}
+tasks.push(task);
+
+localStorage.setItem('task', JSON.stringify('tasks'));
+};
 
 // Remove Task--- by clicking x we want the whole box to be removed not only the x item. so li would be the parent of parent on x --it's two level up in node tree
 function removeTask(e) {
@@ -65,9 +116,32 @@ function removeTask(e) {
     //getting confirmation
     if (confirm('Are you sure?')) {
       e.target.parentElement.parentElement.remove();
+
+      // Remove from local storage-- calling the function
+      removeTaskFromLocalStorage( e.target.parentElement.parentElement);
     }
   }
 }
+// Remove from local storage function
+function removeTaskFromLocalStorage(taskItem){
+  let tasks;
+  if(localStorage.getItem('tasks') === null){
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+    
+  }
+  tasks.forEach(function(task , index){
+    if(taskItem.textContent === task){
+      tasks.splice(index ,1);
+    }
+  });
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+};
+
+
+
+
 // clear task
 function clearTasks(e){
   // taskList.innerHTML = ''; // or we can do this 
@@ -76,6 +150,15 @@ function clearTasks(e){
   while(taskList.firstChild){
     taskList.removeChild(taskList.firstChild);
   }
+
+  // Clear all from local storage
+  clearTasksFromLocalStorage();
+
+}
+// Clear tasks from local storage
+
+function clearTasksFromLocalStorage(){
+  localStorage.clear();
 }
 
 // Filter task
